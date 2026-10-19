@@ -51,63 +51,43 @@ whether you hit them:
 
 ---
 
-## 1.
+## 1. Overall accuracy ≥ 0.72
 
-<!-- Your criterion. It must name a number. -->
+Checked against `accuracy` in `results.json`, on every one of the three seeds.
 
-
-
-**Why this target:**
-
-
+**Why this target:** `reaction` is ~65–70% of random r/tennis posts, and criterion 4 caps it at 70%, so a model that always guesses `reaction` scores at most 0.70. A threshold of 0.72 requires the model to beat that majority-class baseline rather than learn the class distribution.
 
 ---
 
-## 2.
+## 2. Macro F1 ≥ 0.55
 
-<!-- Your criterion. -->
+Checked against `f1_macro` in `results.json`, on every one of the three seeds.
 
-
-
-**Why this target:**
-
-
+**Why this target:** Macro F1 weights all three labels equally, so the model cannot pass by predicting `reaction` well while failing on `metrics` and `conditional`.
 
 ---
 
-## 3.
+## 3. Per-label F1: `reaction` ≥ 0.75, `metrics` ≥ 0.50, `conditional` ≥ 0.35
 
-<!-- Your criterion. -->
+Checked against `per_label.<label>.f1` in `results.json` for each of the three labels, on every one of the three seeds.
 
-
-
-**Why this target:**
-
-
+**Why this target:** The thresholds follow each label's support. With roughly 140 `reaction`, 44 `metrics` and 16 `conditional` posts, `conditional` will have only 2–3 posts in the test split, so one miss moves its F1 a lot; its target is looser for that reason. Separate thresholds give every label a clear pass/fail instead of letting macro F1 average a failing label away.
 
 ---
 
-## 4.
+## 4. Label balance: largest label ≤ 70%, smallest label ≥ 8%
 
-<!-- Your criterion. -->
+Checked against the label counts printed by the notebook's section 2 data check (`df["label"].value_counts(normalize=True)` over the full `labels.csv`).
 
-
-
-**Why this target:**
-
-
+**Why this target:** 70% is the brief's cap — above it the notebook flags `[FIX ME]` and the model learns to guess the majority. The 8% floor means at least 16 of 200 posts are `conditional`, which keeps the smallest label from being starved in the ~30-post test split.
 
 ---
 
-## 5.
+## 5. Agreement with the staff labels ≥ 80%
 
-<!-- Your criterion. -->
+Checked against the `agreement` rate printed by `python agreement.py` (unit 6), comparing my labels on the 30 staff posts to the staff labels.
 
-
-
-**Why this target:**
-
-
+**Why this target:** The agreement check is the only measure of whether I apply a written rule the way its authors intended. My own decision rules are built on textual triggers (a `%` sign, box-score numbers, two explicit "if" branches), so I expect rule-following to be mostly mechanical; under 80% would mean I'm reading intent into posts instead of applying the rule.
 
 ---
 
